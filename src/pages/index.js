@@ -23,9 +23,23 @@ export default function Home() {
   const [totalres, setTotalres] = useState(0);
   const [query, setQuery] = useState('');
 
+  const [prevArticles, setPrevArticles] = useState(articles);
+
+  const onSearch=(query)=>{
+    if(query!==""){
+      const filtered = articles.filter((article) =>
+        article.title.toLowerCase().includes(query.toLowerCase())
+      );
+      setArticles(filtered);
+    }
+    else{
+      setArticles(prevArticles)
+    }
+  }
+
   const handleInputChange = (e) => {
     setQuery(e.target.value);
-    // onSearch(e.target.value);
+    onSearch(e.target.value);
   };
 
 
@@ -71,6 +85,7 @@ export default function Home() {
     axios.get(`https://newsapi.org/v2/everything?q=${category}&sortBy=publishedAt&page=${currentPage}&pageSize=${pageSize}&apiKey=5daed4d4891b47c6bd3afe546b1011f1`)
       .then(function (response) {
         setArticles(response.data.articles);
+        setPrevArticles(response.data.articles)
         setTotalres(response.data.totalResults);
         console.log(response.data.articles);
       })
@@ -88,26 +103,26 @@ export default function Home() {
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
   };
   const formatTitle = (string) => {
-    if(string){
-      if (string.length < 50) {
+    if (string) {
+      if (string.length < 45) {
         return string;
       } else {
-        return string.substr(0, 50).concat("...");
+        return string.substr(0, 45).concat("...");
       }
     }
-    else{
+    else {
       return null
     }
   };
   const formatContent = (string) => {
-    if(string){
+    if (string) {
       if (string.length < 165) {
         return string;
       } else {
         return string.substr(0, 165).concat("...");
       }
     }
-    else{
+    else {
       return null;
     }
   };
@@ -165,7 +180,7 @@ export default function Home() {
       </style>
       <div id="tabs" className="fixed tabs box w-[50px] h-full border flex justify-center items-center transition-all ease 0.2s p-2 bg-white z-50">
         <div className="grid w-full h-[80%]">
-          <div className={`h-fit w-[95%] cursor-pointer hover:bg-gray-100 p-1 rounded-lg text-center ${(category === 'latest') ? "bg-gray-200" : "bg-white"}`} onClick={() => { setCategory("latest");  }}>
+          <div className={`h-fit w-[95%] cursor-pointer hover:bg-gray-100 p-1 rounded-lg text-center ${(category === 'latest') ? "bg-gray-200" : "bg-white"}`} onClick={() => { setCategory("latest"); }}>
             {icon ? <div className="w-[25px]"><Image src="/home.png" alt="Home Icon" width={100} height={100} /></div> : "Home"}
           </div>
           <div className={`h-fit w-[95%] cursor-pointer hover:bg-gray-100 p-1 rounded-lg text-center ${(category === 'local') ? "bg-gray-200" : "bg-white"}`} onClick={() => { setCategory("local") }}>
@@ -210,7 +225,7 @@ export default function Home() {
             value={query}
             onChange={handleInputChange}
             placeholder="Search..."
-            className=""
+            className="md:ml-0 ml-5"
           />
         </div>
         <div className="w-[80%] md:h-[80%] sm:w-[90%] ml-10 sm:ml-0 flex flex-wrap justify-center gap-2 md:gap-3 mt-1 md:overflow-scroll hide-scrollbar">
@@ -218,12 +233,12 @@ export default function Home() {
             loader !== true ? (articles.map((article, index) => {
               return (
                 <Link
-                href={{
-                  pathname: `/news/[slug]`,
-                  query: { source: article.source.name, author: article.author, title: article.title, description: article.description, content: article.content, url:article.url, urlToImage: article.urlToImage, publishedAt: article.publishedAt },
-                }}
-                as={`/news/${encodeURIComponent(article.title)}`}
-                key={index} className="h-[350px] w-[270px] border border-gray-200 flex flex-col items-center rounded-lg hover:border-gray-400 p-2 cursor-pointer">
+                  href={{
+                    pathname: `/news/[slug]`,
+                    query: { source: article.source.name, author: article.author, title: article.title, description: article.description, content: article.content, url: article.url, urlToImage: article.urlToImage, publishedAt: article.publishedAt },
+                  }}
+                  as={`/news/${encodeURIComponent(article.title)}`}
+                  key={index} className="h-[350px] w-[270px] border border-gray-200 flex flex-col items-center rounded-lg hover:border-gray-400 p-2 cursor-pointer">
                   <h1 className={`font-serif relative h-fit w-full border bg-gray-50 rounded-lg flex items-center justify-center text-center text-sm`}>{article.source.name}</h1>
                   <h1 className={`${roboto.className} font-bold mt-2`}>{formatTitle(article.title)}</h1>
                   <div className="w-full h-[35%] flex justify-center bg-gray-100">{article.urlToImage ? <Image className="w-[95%] h-full" src={article.urlToImage} alt={article.title} width={100} height={200} /> : <Image className="w-[95%] h-full" src="/error.jpg" alt={article.title} width={100} height={100} />}</div>
